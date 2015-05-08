@@ -1,0 +1,66 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>JS createNewCellNumberProxy Test</title>
+</head>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script type="text/javascript">
+// Build a class to handle the API call input payload
+function textkeyPayload(apiKey, cellNumber) {
+    this.apiKey = apiKey;
+    this.trueCellNumber = cellNumber;
+    this.toJsonString = function () { 
+			return JSON.stringify({ 'DataIn': this }); 
+		};
+};
+
+// Handle the API Request and response
+function textkeyAPIRequest(txtCommand, APIJSONData) {
+	// Setup the API URL
+	var urlAPI = 'http://www.textkey.com/REST/TKRest.asmx/'+txtCommand;
+
+	// Make the API call via a JSON Ajax request
+	$.ajax({
+		type: "POST",
+		contentType: "application/json; charset=utf-8",
+		url: urlAPI,
+		data: APIJSONData,
+		dataType: "json",
+		success: function (APIResponse, textStatus) {
+			document.write("textStatus: "+textStatus+ "<HR>");
+			document.write("API Response: "+JSON.stringify(APIResponse, null, 4) + "<HR>");
+			if (textStatus == 'success') {
+				if (APIResponse.hasOwnProperty('d')) {
+					APIPayload = APIResponse.d;
+				} else {
+					APIPayload = APIResponse;
+				}
+				document.write("API Payload: "+JSON.stringify(APIPayload, null, 4) + "<HR>");
+				if (APIPayload.errorDescr == "") {
+					document.write("cellNumberProxy: " + cellNumberProxy.userIDCount);
+				}
+				else {
+					document.write("Error: " + APIPayload.errorDescr);
+				}
+			}
+			else {
+				document.write("Error: " + textStatus);
+			}
+		},
+		error: function (jqXHR, textStatus, errorThrown) {
+			document.write("Error: " + jqXHR.status);
+		}
+	});
+}
+
+// Setup the API command
+var txtCommand = 'createNewCellNumberProxy';
+// Build the API payload
+var createNewCellNumberProxy = new textkeyPayload("PUT API KEY HERE", "1231231234");
+// Make the API Call
+textkeyAPIRequest(txtCommand, createNewCellNumberProxy.toJsonString());
+</script>
+<body>
+</body>
+</html>

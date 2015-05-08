@@ -1,0 +1,77 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>JS registerTextKeyUser Test</title>
+</head>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script type="text/javascript">
+// Build a class to handle the API call input payload
+function textkeyPayload(apiKey, command, cellNumber, ownerFName, ownerLName, suppl1, suppl2, userID, isHashed, pinCode, distressPinCode, TextKeyMode, ReceiveMode) {
+    this.apiKey = apiKey;
+    this.command = command;
+    this.cellNumber = cellNumber;
+    this.ownerFName = ownerFName;
+    this.ownerLName = ownerLName;
+    this.suppl1 = suppl1;
+    this.suppl2 = suppl2;
+    this.userID = userID;
+    this.isHashed = isHashed;
+    this.pinCode = pinCode;
+    this.distressPinCode = distressPinCode;
+    this.TextKeyMode = TextKeyMode;
+    this.ReceiveMode = ReceiveMode;
+    this.toJsonString = function () { 
+			return JSON.stringify({ 'DataIn': this }); 
+		};
+};
+
+// Handle the API Request and response
+function textkeyAPIRequest(txtCommand, APIJSONData) {
+	// Setup the API URL
+	var urlAPI = 'http://www.textkey.com/REST/TKRest.asmx/'+txtCommand;
+
+	// Make the API call via a JSON Ajax request
+	$.ajax({
+		type: "POST",
+		contentType: "application/json; charset=utf-8",
+		url: urlAPI,
+		data: APIJSONData,
+		dataType: "json",
+		success: function (APIResponse, textStatus) {
+			document.write("textStatus: "+textStatus+ "<HR>");
+			document.write("API Response: "+JSON.stringify(APIResponse, null, 4) + "<HR>");
+			if (textStatus == 'success') {
+				if (APIResponse.hasOwnProperty('d')) {
+					APIPayload = APIResponse.d;
+				} else {
+					APIPayload = APIResponse;
+				}
+				document.write("API Payload: "+JSON.stringify(APIPayload, null, 4) + "<HR>");
+				if (APIPayload.errorDescr == "") {
+					document.write("userID: " + APIPayload.userID);
+				}
+				else {
+					document.write("Error: " + APIPayload.errorDescr);
+				}
+			}
+			else {
+				document.write("Error: " + textStatus);
+			}
+		},
+		error: function (jqXHR, textStatus, errorThrown) {
+			document.write("Error: " + jqXHR.status);
+		}
+	});
+}
+
+// Setup the API command
+var txtCommand = 'registerTextKeyUser';
+// Build the API payload
+var registerTextKeyUser = new textkeyPayload("PUT API KEY HERE", "Query", "1231231234", "", "", "", "", "", true, "", "", "TextKeyOnly", "AnyCode");
+// Make the API Call
+textkeyAPIRequest(txtCommand, registerTextKeyUser.toJsonString());
+</script>
+<body>
+</body>
+</html>
